@@ -2,13 +2,19 @@ FROM ubuntu:14.04
 
 MAINTAINER sagar.mattoo@aditi.com,vijayshinvabk@aditi.com
 
-########################GitLab##########################
-# Install required packages : GitLab
+#######################Install##########################
 RUN apt-get update -q \
     && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends \
       ca-certificates \
       openssh-server \
-      wget
+      wget \
+	  curl \
+	  zip \
+	  default-jre \ 
+	  default-jdk \
+	  && rm -rf /var/lib/apt/lists/*
+
+########################GitLab##########################
 
 # Download & Install GitLab
 # If the Omnibus package version below is outdated please contribute a merge request to update it.
@@ -37,12 +43,9 @@ ADD gitlab.rb /etc/gitlab/
 CMD gitlab-ctl reconfigure & /opt/gitlab/embedded/bin/runsvdir-start
 
 ######################Java###############################
-RUN apt-get install default-jre
-RUN apt-get install default-jdk
 
 ######################Jenkins############################
 
-RUN apt-get update && apt-get install -y wget curl zip && rm -rf /var/lib/apt/lists/*
 ENV JENKINS_HOME /var/jenkins_home
 ENV JENKINS_HOME /var/jenkins_home
 
@@ -87,3 +90,23 @@ ENTRYPOINT ["/usr/local/bin/jenkins.sh"]
 COPY plugins.sh /usr/local/bin/plugins.sh
 
 ##########################JIRA#################################
+ENV JIRA_VERSION 6.3.1
+RUN curl -Lks http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-${JIRA_VERSION}.tar.gz -o /root/jira.tar.gz
+RUN /usr/sbin/useradd --create-home --home-dir /opt/jira --groups atlassian --shell /bin/bash jira
+RUN tar zxf /root/jira.tar.gz --strip=1 -C /opt/jira
+RUN chown -R jira:jira /var/atlassian/jira
+RUN echo "jira.home = /var/atlassian/jira" > /opt/jira/atlassian-jira/WEB-INF/classes/jira-application.properties
+RUN chown -R jira:jira /opt/jira
+RUN mv /opt/jira/conf/server.xml /opt/jira/conf/server-backup.xml
+
+ENV CONTEXT_PATH ROOT
+
+ADD launch.bash /launch
+
+# Launching Jira
+WORKDIR /opt/jira
+VOLUME ["/var/atlassian/jira"]
+EXPOSE 8090
+USER jira
+
+CMD ["/launch"]
