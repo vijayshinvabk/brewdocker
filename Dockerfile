@@ -91,7 +91,7 @@ COPY plugins.sh /usr/local/bin/plugins.sh
 
 ##########################JIRA#################################
 ENV JIRA_VERSION 6.3.1
-RUN curl -Lks http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-${JIRA_VERSION}.tar.gz -o /usr/share/jira.tar.gz
+RUN curl -L http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-${JIRA_VERSION}.tar.gz -o /usr/share/jira.tar.gz
 RUN /usr/sbin/useradd --create-home --home-dir /opt/jira --groups atlassian --shell /bin/bash jira
 RUN tar zxf /usr/share/jira.tar.gz --strip=1 -C /opt/jira
 RUN chown -R jira:jira /var/atlassian/jira
