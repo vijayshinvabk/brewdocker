@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM java:openjdk-7u65-jdk
 
 MAINTAINER sagar.mattoo@aditi.com,vijayshinvabk@aditi.com
 
@@ -10,8 +10,6 @@ RUN apt-get update -q \
       wget \
 	  curl \
 	  zip \
-	  default-jre \ 
-	  default-jdk \
 	  && rm -rf /var/lib/apt/lists/*
 
 ########################GitLab##########################
