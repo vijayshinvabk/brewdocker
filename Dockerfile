@@ -91,10 +91,16 @@ COPY plugins.sh /usr/local/bin/plugins.sh
 
 ##########################JIRA#################################
 ENV JIRA_VERSION 6.3.1
-RUN sudo mkdir -p /usr/share/jira
-RUN curl -L http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-${JIRA_VERSION}.tar.gz -o /usr/share/jira/jira.tar.gz
+#RUN sudo mkdir -p /usr/share/jira
 RUN /usr/sbin/useradd --create-home --home-dir /opt/jira --groups atlassian --shell /bin/bash jira
-RUN tar zxf /usr/share/jira/jira.tar.gz --strip=1 -C /opt/jira
+RUN TMP_FILE=$(mktemp); \
+    wget -q -O $TMP_FILE http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-${JIRA_VERSION}.tar.gz \
+    && tar zxf $TMP_FILE --strip=1 -C /opt/jira \
+    && rm -f $TMP_FILE
+
+#RUN curl -L http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-${JIRA_VERSION}.tar.gz -o /usr/share/jira/jira.tar.gz
+#RUN /usr/sbin/useradd --create-home --home-dir /opt/jira --groups atlassian --shell /bin/bash jira
+#RUN tar zxf /usr/share/jira/jira.tar.gz --strip=1 -C /opt/jira
 RUN chown -R jira:jira /var/atlassian/jira
 RUN echo "jira.home = /var/atlassian/jira" > /opt/jira/atlassian-jira/WEB-INF/classes/jira-application.properties
 RUN chown -R jira:jira /opt/jira
